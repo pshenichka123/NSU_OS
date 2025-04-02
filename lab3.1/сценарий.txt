@@ -1,0 +1,39 @@
+gcc main.c -Wall -Wextra -pedantic
+
+./a.out dir
+
+ls -l 
+- — обычный файл.
+
+d — каталог.
+
+l — символическая ссылка.
+
+b — блочное устройство.
+
+c — символьное устройство.
+
+
+в цикле считываем названия файлов
+hexdump txt.1elif -c    байты в кодировке ascii
+
+ lstat() is identical to stat(), except that  if  pathname  is  a
+       symbolic  link,  then  it returns information about the link it‐
+       self, not the file that the link refers to.
+
+
+man 2 rmdir
+man 2 opendir
+man lstat
+man 7 inode 
+
+
+
+ln -s path/name my_link это симв ссылка
+ln   path/name my_link  это жесткая ссылка
+
+/proc/<id_process>/fd
+
+Владелец (Owner) — пользователь, который является владельцем файла или каталога. 1
+Группа (Group) — группа пользователей, к которой принадлежит файл или каталог. 1
+Остальные пользователи (Others) — все остальные пользователи системы. 1
