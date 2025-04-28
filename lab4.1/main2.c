@@ -49,7 +49,7 @@ void buffer_operations() {
     free(buffer1);
     printf("Buffer content after free: %s\n", buffer1);
 
-    char* buffer2 = (char*)malloc(10000);
+    char* buffer2 = (char*)malloc(1024);
     if (buffer2 == NULL) {
         perror("Failed to allocate buffer2");
         return;
@@ -59,15 +59,16 @@ void buffer_operations() {
 
     char* mid_ptr = buffer2 + 50;
     free(mid_ptr);
-    malloc_trim(0);
     printf("New buffer content after free: %s\n", buffer2);
 }
 
 
 
-void print_local_vars(int* local_var, int* static_var, const int* local_const) {
+void print_local_vars() {
 
-
+    int local_var = 30;
+    static int static_var = 40;
+    const int local_const = 50;
     printf("Local variable address: %p\n", (void*)&local_var);
     printf("Static variable address: %p\n", (void*)&static_var);
     printf("Local constant address: %p\n", (void*)&local_const);
@@ -115,13 +116,16 @@ void print_proc_maps()
 
 
 int main(int argc, char** argv) {
-    int local_var = 30;
-    static int static_var = 40;
-    const int local_const = 50;
-    print_local_vars(&local_var, &static_var, &local_const);
+
+    if (argc < 2) {
+        puts("Pass parameter: enviroment name");
+        return 0;
+    }
+    print_local_vars();
     print_global_vars();
-    print_proc_maps();
-    buffer_operations();
+    //print_proc_maps();
+    //buffer_operations();
+
     set_env_var(argv[1]);
 
     return 0;
