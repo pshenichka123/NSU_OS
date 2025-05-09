@@ -17,3 +17,4 @@
 int go_inside_dir(const char* dest_dir, const char* cur_dir_name, const char* src_path);
 int process_directory(const char* src_dir, const char* dest_dir);
 int go_inside_dir(const char* dest_dir, const char* cur_dir_name, const char* src_path);
+int prepare_dest_path(const char* dest_dir, const char* file_name, char* dest_path);

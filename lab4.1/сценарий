@@ -1,13 +1,16 @@
-%p адресс 
+под strace  если запускаешь прогу то в начале execve, 
+man говорит что вобще можно так  main писать
+ The argument vector and environment can be accessed by the new program's main function, when it is defined as:
 
-<начальный_адрес>-<конечный_адрес> <права_доступа> <смещение> <устройство> <inode>      [имя_файла]
+           int main(int argc, char *argv[], char *envp[])
+
+       Note,  however,  that  the  use of a third argument to the main function is not specified in POSIX.1; according to POSIX.1, the environment
+       should be accessed via the external variable environ(7).
 
 
 
 
 
 
-все локальные на стеке
-
-статик тоже
-глобальные в где та там по своим, в D R B. 
+.bashrc запускается при старте терминала всегда в начале туда можно добавить export env=val
+переменные нужны для контекстов программы OC. пути , я зыки. названия утилит.и

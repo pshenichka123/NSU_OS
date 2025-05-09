@@ -3,6 +3,19 @@
 #define DIR_ACCESS (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
 #define FILE_ACCESS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) 
 
+
+
+void reverse_buffer(char* buffer, int buffer_size)
+{
+    for (int i = 0; i < buffer_size / 2; i++)
+    {
+        char temp = buffer[i];
+        buffer[i] = buffer[buffer_size - i - 1];
+        buffer[buffer_size - i - 1] = temp;
+    }
+}
+
+
 int get_file_size(int fd)
 {
     int file_size = lseek(fd, 0, SEEK_END);

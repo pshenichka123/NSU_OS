@@ -8,6 +8,43 @@ int global_uninitialized;
 const int global_const = 20;
 
 
+
+
+void print_proc_status()
+{
+    pid_t pid = getpid();
+
+    char path[256];
+    snprintf(path, sizeof(path), "/proc/%d/status", pid);
+
+    FILE* file = fopen(path, "r");
+    if (file == NULL) {
+        perror("Failed to open /proc/<pid>/status");
+        return;
+    }
+
+    char buff[256];
+    while (true) {
+        char* read_line = fgets(buff, sizeof(buff), file);
+        if (read_line == NULL) {
+            if (!feof(file)) {
+                perror("Error reading file");
+                break;
+            }
+            printf("Reached end of file\n");
+            break;
+        }
+
+        printf("%s", buff);
+    }
+
+    fclose(file);
+
+    return;
+}
+
+
+
 void set_env_var(const char* env_var_name) {
 
     char* env_value = getenv(env_var_name);

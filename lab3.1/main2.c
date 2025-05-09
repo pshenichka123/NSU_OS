@@ -1,53 +1,6 @@
 #include"fordirs.h"
 
 
-
-
-
-void reverse_buffer(char* buffer, int buffer_size)
-{
-    for (int i = 0; i < buffer_size / 2; i++)
-    {
-        char temp = buffer[i];
-        buffer[i] = buffer[buffer_size - i - 1];
-        buffer[buffer_size - i - 1] = temp;
-    }
-}
-
-
-
-
-
-
-
-
-int prepare_dest_path(const char* dest_dir, const char* file_name, char* dest_path)
-{
-    char reversed_name[PATH_MAX];
-    strncpy(reversed_name, file_name, PATH_MAX - 1);
-    int name_len = strlen(reversed_name);
-    reverse_buffer(reversed_name, name_len);
-    strncpy(dest_path, dest_dir, PATH_MAX - 1);
-    int dest_path_len = strlen(dest_path);
-    if ((dest_path_len + 1) >= PATH_MAX) {
-        fprintf(stderr, "Path name is too long:%s/", dest_path);
-        perror("Error");
-        return ERROR;
-    }
-    strncat(dest_path, "/", PATH_MAX - strlen(dest_path) - 1);
-    if ((dest_path_len + name_len) >= PATH_MAX)
-    {
-        fprintf(stderr, "Path name is too long:%s%s", dest_path, reversed_name);
-        perror("Error");
-        return ERROR;
-    }
-    strncat(dest_path, reversed_name, PATH_MAX - strlen(dest_path) - 1);
-    return 0;
-}
-
-
-
-
 const char* get_last_dir(const char* path, char* dir_name) {
     if (path == NULL || *path == '\0') {
         return NULL;
