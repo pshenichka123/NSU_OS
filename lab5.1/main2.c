@@ -24,7 +24,11 @@ void Child_Process(int* local_var)
     *local_var = 200;
     printf("Child process - changed global_var: value=%d\n", global_var);
     printf("Child process - changed local_var: value=%d\n", *local_var);
+<<<<<<< HEAD
     sleep(15);
+=======
+    sleep(10);
+>>>>>>> 625065145a2cb4f237e0d60d26c3caaaf6916a52
 
 }
 
