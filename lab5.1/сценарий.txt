@@ -1,0 +1,62 @@
+man 2 fork
+man 2 wait тут про возвращаемые значения и тд
+
+
+
+
+fork создает новый процесс со своим адресным пространоством, он является точной копией предыдущего помимо того что :
+у них разный pid, 
+у дочернего адрес родительского совпадает с родительским 
+счетчики 
+
+
+
+
+
+
+
+
+ gcc main.c -o main -Wall -Wextra -pedantic
+ gcc main_with_proc_maps.c -o maps -Wall -Wextra -pedantic
+ gcc main_with_proc_status.c -o status -Wall -Wextra -pedantic
+
+
+ diff main2.c  main3.c
+
+
+
+
+
+
+diff 3998/maps 3997/maps
+
+
+
+
+
+
+
+
+
+
+ getpid()  returns  the process ID (PID) of the calling process.  (This is often used by routines that generate
+       unique temporary filenames.)
+
+       getppid() returns the process ID of the parent of the calling process.  This will be  either  the  ID  of  the
+       process  that  created  this  process  using fork(), or, if that process has already terminated, the ID of the
+       process to which this process has been reparented (either init(1) or a "subreaper"  process  defined  via  the
+       prctl(2) PR_SET_CHILD_SUBREAPER operation).
+
+
+fork:
+ VALUE
+       On  success, the PID of the child process is returned in the parent, and 0 is returned in the child.  On fail‐
+       ure, -1 is returned in the parent, no child process is created, and errno is set appropriately.
+
+
+wait :
+
+wait(): on success, returns the process ID of the terminated child; on error, -1 is returned.
+
+ If wstatus is not NULL, wait() and waitpid() store status information in the int to which it points.  This in‐
+       teger can be inspected with the following macros
