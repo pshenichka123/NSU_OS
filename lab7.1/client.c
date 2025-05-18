@@ -29,8 +29,6 @@ int main() {
         fgets(buffer, BUFFER_SIZE, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        if (strcmp(buffer, "quit") == 0) break;
-
         sendto(sockfd, buffer, strlen(buffer), 0,
             (const struct sockaddr*)&servaddr, sizeof(servaddr));
 
