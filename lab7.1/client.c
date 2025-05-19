@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
+#define ERROR -1
 #define PORT 5005
 #define BUFFER_SIZE 1024
 
@@ -13,9 +13,10 @@ int main() {
     char buffer[BUFFER_SIZE];
     struct sockaddr_in servaddr;
 
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == ERROR) {
         perror("socket creation failed");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     memset(&servaddr, 0, sizeof(servaddr));
@@ -28,11 +29,19 @@ int main() {
         printf("Enter message: ");
         fgets(buffer, BUFFER_SIZE, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
-
-        sendto(sockfd, buffer, strlen(buffer), 0,
-            (const struct sockaddr*)&servaddr, sizeof(servaddr));
-
-        int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+        int n;
+        n = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr*)&servaddr, sizeof(servaddr));
+        if (n == ERROR)
+        {
+            perror("recvfrom error");
+            return 0;
+        }
+        n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+        if (n == ERROR)
+        {
+            perror("recvfrom error");
+            return 0;
+        }
         buffer[n] = '\0';
         printf("Server echo: %s\n", buffer);
     }
