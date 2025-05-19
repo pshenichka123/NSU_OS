@@ -56,7 +56,7 @@ int main() {
 
     if (child_pid == ERROR) {
         perror("wait failed");
-        exit(1);
+        return ERROR;
     }
 
     bool executed_correctly = WIFEXITED(status);
