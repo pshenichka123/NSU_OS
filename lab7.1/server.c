@@ -11,7 +11,7 @@ int main() {
     int sockfd;
     char buffer[BUFFER_SIZE];
     struct sockaddr_in servaddr, cliaddr;
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);  //
     if (sockfd == ERROR) {
         perror("socket creation failed");
         return EXIT_FAILURE;
@@ -42,7 +42,7 @@ int main() {
         buffer[n] = '\0';
         printf("Received message: %s\n", buffer);
 
-        sendto(sockfd, buffer, n, 0, (const struct sockaddr*)&cliaddr, src_addr_len);
+        int n = sendto(sockfd, buffer, n, 0, (const struct sockaddr*)&cliaddr, src_addr_len);
         if (n == ERROR)
         {
             perror("recvfrom error");

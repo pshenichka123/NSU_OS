@@ -27,20 +27,26 @@ int main() {
 
     while (1) {
         printf("Enter message: ");
-        fgets(buffer, BUFFER_SIZE, stdin);
+
+        char* message = fgets(buffer, BUFFER_SIZE, stdin);
+        if (message == NULL)
+        {
+            puts("file ended");
+            break;
+        }
         buffer[strcspn(buffer, "\n")] = '\0';
         int n;
         n = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr*)&servaddr, sizeof(servaddr));
         if (n == ERROR)
         {
             perror("recvfrom error");
-            return 0;
+            break;
         }
         n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
         if (n == ERROR)
         {
             perror("recvfrom error");
-            return 0;
+            break;
         }
         buffer[n] = '\0';
         printf("Server echo: %s\n", buffer);
