@@ -11,14 +11,11 @@ int main() {
     int sockfd;
     char buffer[BUFFER_SIZE];
     struct sockaddr_in servaddr, cliaddr;
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);  //
+    sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);  //
     if (sockfd == ERROR) {
         perror("socket creation failed");
         return EXIT_FAILURE;
     }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = INADDR_ANY;
@@ -33,17 +30,17 @@ int main() {
 
     while (1) {
         socklen_t src_addr_len = sizeof(cliaddr);
-        int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&cliaddr, &src_addr_len);
-        if (n == ERROR)
+        int recv_count = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&cliaddr, &src_addr_len);
+        if (recv_count == ERROR)
         {
             perror("recvfrom error");
             return 0;
         }
-        buffer[n] = '\0';
+        buffer[recv_count] = '\0';
         printf("Received message: %s\n", buffer);
 
-        int n = sendto(sockfd, buffer, n, 0, (const struct sockaddr*)&cliaddr, src_addr_len);
-        if (n == ERROR)
+        int send_count = sendto(sockfd, buffer, recv_count, 0, (const struct sockaddr*)&cliaddr, src_addr_len);
+        if (send_count == ERROR)
         {
             perror("recvfrom error");
             return 0;

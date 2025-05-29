@@ -13,13 +13,11 @@ int main() {
     char buffer[BUFFER_SIZE];
     struct sockaddr_in servaddr;
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sockfd == ERROR) {
         perror("socket creation failed");
         return EXIT_FAILURE;
     }
-
-    memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
@@ -35,20 +33,20 @@ int main() {
             break;
         }
         buffer[strcspn(buffer, "\n")] = '\0';
-        int n;
-        n = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr*)&servaddr, sizeof(servaddr));
-        if (n == ERROR)
+
+        int send_count = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr*)&servaddr, sizeof(servaddr));
+        if (send_count == ERROR)
         {
             perror("recvfrom error");
             break;
         }
-        n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
-        if (n == ERROR)
+        int recv_count = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+        if (recv_count == ERROR)
         {
             perror("recvfrom error");
             break;
         }
-        buffer[n] = '\0';
+        buffer[recv_count] = '\0';
         printf("Server echo: %s\n", buffer);
     }
 
