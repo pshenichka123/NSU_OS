@@ -16,7 +16,6 @@ int main() {
     sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sockfd == ERROR) {
         perror("socket creation failed");
-        return EXIT_FAILURE;
     }
 
     servaddr.sin_family = AF_INET;
@@ -30,7 +29,8 @@ int main() {
         if (message == NULL)
         {
             puts("file ended");
-            break;
+            close(sockfd);
+            return EXIT_FAILURE;
         }
         buffer[strcspn(buffer, "\n")] = '\0';
 
@@ -38,18 +38,20 @@ int main() {
         if (send_count == ERROR)
         {
             perror("recvfrom error");
-            break;
+            close(sockfd);
+            return EXIT_FAILURE;
         }
         int recv_count = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
         if (recv_count == ERROR)
         {
             perror("recvfrom error");
-            break;
+            close(sockfd);
+            return EXIT_FAILURE;
         }
         buffer[recv_count] = '\0';
         printf("Server echo: %s\n", buffer);
     }
 
     close(sockfd);
-    return 0;
+    return EXIT_SUCCESS;
 }
