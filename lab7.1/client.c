@@ -7,6 +7,7 @@
 #define ERROR -1
 #define PORT 5005
 #define BUFFER_SIZE 1024
+#define NO_FLAGS 0
 
 int main() {
     int sockfd;
@@ -34,14 +35,14 @@ int main() {
         }
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        int send_count = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr*)&servaddr, sizeof(servaddr));
+        int send_count = sendto(sockfd, buffer, strlen(buffer), NO_FLAGS, (const struct sockaddr*)&servaddr, sizeof(servaddr));
         if (send_count == ERROR)
         {
             perror("recvfrom error");
             close(sockfd);
             return EXIT_FAILURE;
         }
-        int recv_count = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+        int recv_count = recvfrom(sockfd, buffer, BUFFER_SIZE, NO_FLAGS, NULL, NULL);
         if (recv_count == ERROR)
         {
             perror("recvfrom error");
