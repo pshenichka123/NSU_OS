@@ -17,7 +17,7 @@ int main() {
     sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sockfd == ERROR) {
         perror("socket creation failed");
-        return -EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
 
     servaddr.sin_family = AF_INET;
