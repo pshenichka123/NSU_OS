@@ -25,6 +25,7 @@ int main() {
     int binding_status = bind(sockfd, (const struct sockaddr*)&servaddr, sizeof(servaddr));
     if (binding_status == ERROR) {
         perror("bind failed");
+        close(sockfd);
         return EXIT_FAILURE;
     }
 
