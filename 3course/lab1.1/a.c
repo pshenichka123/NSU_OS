@@ -23,7 +23,7 @@ int main()
     if (err != SUCCESS)
     {
         fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
-        return -1;
+        pthread_exit(NULL);
     }
 
     pthread_exit(NULL);

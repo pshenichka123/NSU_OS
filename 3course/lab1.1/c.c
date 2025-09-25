@@ -15,10 +15,10 @@ void *mythread(void *arg)
     static int static_local_var = 0;
     const int const_local_var = 0;
 
-    printf("mythread [%d %d %d %ld]: Hello from mythread!\n",
-           getpid(), getppid(), gettid(), pthread_self());
+    printf("mythread [%d %d %d %lu]: Hello from mythread!\n",
+           getpid(), getppid(), gettid(), (unsigned long)pthread_self());
     printf("Addresses: local=%p, static_local=%p, const_local=%p, global=%p\n",
-           &local_var, &static_local_var, &const_local_var, &global_var);
+           (void *)(&local_var), (void *)(&static_local_var), (void *)(&const_local_var), (void *)(&global_var));
 
     return NULL;
 }
@@ -36,7 +36,7 @@ int main()
         if (err != SUCCESS)
         {
             fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
-            return -1;
+            pthread_exit(NULL);
         }
     }
 
