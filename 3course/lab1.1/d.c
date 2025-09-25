@@ -37,10 +37,11 @@ int main()
         if (err != SUCCESS)
         {
             fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
-            return -1;
+            pthread_exit(NULL);
         }
     }
 
     printf("Final global_var=%d\n", global_var);
+    sleep(100);
     pthread_exit(NULL);
 }
