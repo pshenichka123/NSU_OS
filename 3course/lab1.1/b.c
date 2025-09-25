@@ -30,13 +30,5 @@ int main()
         }
     }
 
-    for (int i = 0; i < THREAD_COUNT; i++)
-    {
-        if (pthread_join(tid[i], NULL) != SUCCESS)
-        {
-            fprintf(stderr, "main: pthread_join() failed: %s\n", strerror(err));
-        }
-    }
-
     pthread_exit(NULL);
 }

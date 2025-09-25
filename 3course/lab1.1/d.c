@@ -41,14 +41,6 @@ int main()
         }
     }
 
-    for (int i = 0; i < THREAD_COUNT; i++)
-    {
-        if (pthread_join(tid[i], NULL) != SUCCESS)
-        {
-            fprintf(stderr, "main: pthread_join() failed: %s\n", strerror(err));
-        }
-    }
-
     printf("Final global_var=%d\n", global_var);
     pthread_exit(NULL);
 }

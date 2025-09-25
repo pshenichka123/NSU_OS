@@ -25,9 +25,6 @@ int main()
         fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
         return -1;
     }
-    if (pthread_join(tid, NULL) != SUCCESS)
-    {
-        fprintf(stderr, "main: pthread_join() failed: %s\n", strerror(err));
-    }
+
     pthread_exit(NULL);
 }

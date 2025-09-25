@@ -25,13 +25,8 @@ int main()
         if (err)
         {
             fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
-            return -1;
+            pthread_exit(NULL);
         }
-    }
-
-    for (int i = 0; i < 5; i++)
-    {
-        pthread_join(tid[i], NULL);
     }
 
     pthread_exit(NULL);
