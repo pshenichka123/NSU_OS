@@ -37,6 +37,5 @@ int main()
         perror("pthread_join");
         return ERROR;
     }
-
     return SUCCESS;
 }

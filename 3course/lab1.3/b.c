@@ -53,23 +53,26 @@ int main()
     strcpy(data->str, message);
     if (data->str == NULL)
     {
+        free(data);
         perror("malloc");
         return ERROR;
     }
-
     pthread_attr_t attr;
-
     pthread_t thread;
     int result = init_detached(&attr);
     if (result != SUCCESS)
     {
         perror("init_detached");
+        free(data->str);
+        free(data);
         pthread_attr_destroy(&attr);
         return ERROR;
     }
     result = pthread_create(&thread, &attr, thread_func, data);
     if (result != SUCCESS)
     {
+        free(data->str);
+        free(data);
         perror("pthread_create");
         pthread_attr_destroy(&attr);
         return ERROR;
@@ -78,7 +81,7 @@ int main()
     if (result != SUCCESS)
     {
         perror("pthread_attr_destroy");
-        return ERROR;
+        pthread_exit(NULL);
     }
     pthread_exit(NULL);
 }
