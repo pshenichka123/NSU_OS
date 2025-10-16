@@ -39,6 +39,15 @@ int init_detached(pthread_attr_t *attr)
     }
     return SUCCESS;
 }
+
+void end_routine(char *str, struct my_struct *data, pthread_attr_t *attr)
+{
+    perror(str);
+    free(data->str);
+    free(data);
+    pthread_attr_destroy(attr);
+}
+
 int main()
 {
     struct my_struct *data = (struct my_struct *)malloc(sizeof(struct my_struct));
@@ -50,31 +59,26 @@ int main()
     data->digit = 5;
     char *message = "string";
     data->str = (char *)malloc(sizeof(char) * (strlen(message) + 1));
-    strcpy(data->str, message);
     if (data->str == NULL)
     {
         free(data);
         perror("malloc");
         return ERROR;
     }
+    strcpy(data->str, message);
+
     pthread_attr_t attr;
     pthread_t thread;
     int result = init_detached(&attr);
     if (result != SUCCESS)
     {
-        perror("init_detached");
-        free(data->str);
-        free(data);
-        pthread_attr_destroy(&attr);
+        end_routine("init_detached", data, &attr);
         return ERROR;
     }
     result = pthread_create(&thread, &attr, thread_func, data);
     if (result != SUCCESS)
     {
-        free(data->str);
-        free(data);
-        perror("pthread_create");
-        pthread_attr_destroy(&attr);
+        end_routine("pthread_create", data, &attr);
         return ERROR;
     }
     result = pthread_attr_destroy(&attr);
