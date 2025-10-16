@@ -66,7 +66,6 @@ int main()
         return ERROR;
     }
     strcpy(data->str, message);
-
     pthread_attr_t attr;
     pthread_t thread;
     int result = init_detached(&attr);

@@ -26,7 +26,6 @@ int main()
         ++counter;
     }
     printf("thread count: %d\n", counter);
-    getchar();
 
     return SUCCESS;
 }

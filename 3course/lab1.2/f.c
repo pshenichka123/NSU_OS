@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define SUCCESS 0
 #define ERROR -1
@@ -15,6 +16,7 @@ void *thread_func(void *arg)
 
 int main()
 {
+    int counter = 0;
     pthread_attr_t attr;
     int result = pthread_attr_init(&attr);
     if (result != SUCCESS)
@@ -40,7 +42,8 @@ int main()
             perror("pthread_create");
             break;
         }
-        int a = getchar();
+        ++counter;
+        printf("thread count: %d\n", counter);
     }
     pthread_attr_destroy(&attr);
     return SUCCESS;
