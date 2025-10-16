@@ -10,7 +10,7 @@
 
 int global_var = 0;
 
-void *mythread(void *arg)
+void *mythread()
 {
     int local_var = 0;
 

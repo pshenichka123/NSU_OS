@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Определение числовых констант
 #define SUCCESS 0
 #define ERROR -1
 

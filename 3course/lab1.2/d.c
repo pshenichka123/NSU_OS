@@ -24,9 +24,8 @@ int main()
             break;
         }
         ++counter;
-        printf("thread count: %d\n", counter);
     }
-
+    printf("thread count: %d\n", counter);
     getchar();
 
     return SUCCESS;

@@ -7,7 +7,7 @@
 #include <unistd.h>
 #define SUCCESS 0
 #define THREAD_COUNT 5
-void *mythread(void *arg)
+void *mythread()
 {
     printf("mythread [%d %d %d]: Hello from mythread!\n", getpid(), getppid(), gettid());
     return NULL;

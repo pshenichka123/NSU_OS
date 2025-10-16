@@ -27,6 +27,7 @@ int main()
     if (result != SUCCESS)
     {
         perror("pthread_attr_setdetachstate");
+        pthread_attr_destroy(&attr);
         return ERROR;
     }
 

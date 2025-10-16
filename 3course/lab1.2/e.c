@@ -26,7 +26,7 @@ int main()
         if (result != SUCCESS)
         {
             perror("pthread_create");
-            break; // Прерываем цикл при ошибке
+            break;
         }
         int a = getchar();
     }

@@ -9,7 +9,7 @@
 #define THREAD_COUNT 5
 int global_var = 0;
 
-void *mythread(void *arg)
+void *mythread()
 {
     int local_var = 0;
     static int static_local_var = 0;
@@ -33,12 +33,13 @@ int main()
     for (int i = 0; i < THREAD_COUNT; i++)
     {
         err = pthread_create(&tid[i], NULL, mythread, NULL);
+        printf("Created thread with tid: %lu\n", tid[i]);
         if (err != SUCCESS)
         {
             fprintf(stderr, "main: pthread_create() failed: %s\n", strerror(err));
             pthread_exit(NULL);
         }
     }
-
+    sleep(100);
     pthread_exit(NULL);
 }
