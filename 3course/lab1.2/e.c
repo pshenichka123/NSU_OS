@@ -7,7 +7,7 @@
 #define SUCCESS 0
 #define ERROR -1
 
-void *thread_func(void *arg)
+void *thread_func()
 {
     printf("Идентификатор потока: %lu\n", (unsigned long)pthread_self());
     int result = pthread_detach(pthread_self());
@@ -31,7 +31,8 @@ int main()
             break;
         }
         ++counter;
-        printf("thread count: %d\n", counter);
     }
+    printf("thread count: %d\n", counter);
+
     return SUCCESS;
 }

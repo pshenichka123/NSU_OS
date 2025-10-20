@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define SUCCESS 0
 #define ERROR -1
@@ -29,7 +30,6 @@ int main()
         return ERROR;
     }
 
-    int returned_value = *(int *)ret_val;
-    printf("Основной поток: получено значение %d.\n", returned_value);
+    printf("Основной поток: получено значение %ld.\n", (long)ret_val);
     return SUCCESS;
 }
