@@ -5,12 +5,17 @@
 
 #define SUCCESS 0
 #define ERROR -1
-
+#define STR "hello world"
 void *thread_func()
 {
-
-    printf("Поток создан и возвращает строку.\n");
-    return (void *)"hello world";
+    char *ret = malloc((strlen(STR) + 1) * sizeof(char));
+    if (ret == NULL)
+    {
+        perror("malloc");
+        return NULL;
+    }
+    strcpy(ret, STR);
+    return (void *)ret;
 }
 
 int main()
@@ -32,5 +37,6 @@ int main()
     }
     char *returned_str = (char *)ret_val;
     printf("Основной поток: получена строка \"%s\".\n", returned_str);
+    free(returned_str);
     return SUCCESS;
 }
