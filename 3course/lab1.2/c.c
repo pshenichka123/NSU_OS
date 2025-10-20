@@ -33,6 +33,8 @@ int main()
     if (result != SUCCESS)
     {
         perror("pthread_join");
+        free(returned_str);
+
         return ERROR;
     }
     char *returned_str = (char *)ret_val;
