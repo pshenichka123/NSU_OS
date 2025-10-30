@@ -33,7 +33,7 @@ int main()
     if (result != SUCCESS)
     {
         perror("pthread_join");
-        free(returned_str);
+        free(ret_val);
 
         return ERROR;
     }
