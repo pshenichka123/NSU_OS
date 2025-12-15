@@ -39,7 +39,7 @@ queue_t *queue_init(int max_count)
     if (q == NULL)
     {
         printf("Cannot allocate memory for a queue\n");
-        abort();
+        return NULL;
     }
 
     q->first = NULL;

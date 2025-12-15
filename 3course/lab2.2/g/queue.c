@@ -40,7 +40,7 @@ queue_t *queue_init(int max_count)
 	if (q == NULL)
 	{
 		printf("Cannot allocate memory for a queue\n");
-		abort();
+		return NULL;
 	}
 
 	q->first = NULL;
@@ -55,7 +55,7 @@ queue_t *queue_init(int max_count)
 	{
 		printf("queue_init: sem_init(available_slots) failed: %s\n", strerror(errno));
 		free(q);
-		abort();
+		return NULL;
 	}
 
 	err = sem_init(&q->available_items, PROCESS_PRIVATE, NO_ITEMS);
