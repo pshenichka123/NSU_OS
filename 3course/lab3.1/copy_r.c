@@ -172,7 +172,11 @@ int count_directory_entries(DIR *dir)
 void join_all_threads(pthread_t *threads, int count)
 {
     for (int i = 0; i < count; i++)
-        pthread_join(threads[i], NULL);
+    {
+        int ret = pthread_join(threads[i], NULL);
+        if (ret != 0)
+            perror("pthread_join failed");
+        }
 }
 
 void copy_directory_permissions(const char *src, const char *dst)
@@ -220,11 +224,9 @@ int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *thread
 
     int cr = -1;
     if (S_ISREG(st.st_mode))
-        cr = safe_pthread_create(&threads[*thread_count], NULL,
-                                 copy_file, new_task);
-    else if (S_ISDIR(st.st_mode))
-        cr = safe_pthread_create(&threads[*thread_count], NULL,
-                                 process_directory, new_task);
+        cr = safe_pthread_create(&threads[*thread_count], NULL, copy_file, new_task);
+    if (S_ISDIR(st.st_mode))
+        cr = safe_pthread_create(&threads[*thread_count], NULL, process_directory, new_task);
     else
     {
         free(new_task);
@@ -285,7 +287,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%s source_dir dest_dir\n", argv[0]);
         return 1;
     }
-
     char real_src[PATH_MAX], real_dst[PATH_MAX];
     char *rp_res = realpath(argv[1], real_src);
     if (rp_res == NULL)
@@ -293,7 +294,6 @@ int main(int argc, char *argv[])
         perror("realpath source");
         return 1;
     }
-
     struct stat st;
     int st_res = stat(real_src, &st);
     if (st_res == -1 || !S_ISDIR(st.st_mode))
@@ -301,33 +301,26 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Source is not a directory\n");
         return 1;
     }
-
     int res = mkdir(argv[2], 0755);
     if (res == -1 && errno != EEXIST)
     {
         perror("mkdir dest");
         return 1;
     }
-
     rp_res = realpath(argv[2], real_dst);
     if (rp_res == NULL)
     {
         perror("realpath dest");
         return 1;
     }
-
-    if (!strncmp(real_src, real_dst, strlen(real_src)) &&
-        (real_dst[strlen(real_src)] == '/' ||
-         real_dst[strlen(real_src)] == '\0'))
+    if (!strncmp(real_src, real_dst, strlen(real_src)) && (real_dst[strlen(real_src)] == '/' || real_dst[strlen(real_src)] == '\0'))
     {
         fprintf(stderr, "Dest is inside source\n");
         return 1;
     }
-
     struct copy_task *root = malloc(sizeof(*root));
     strncpy(root->sourcePath, real_src, PATH_MAX);
     strncpy(root->dstPath, real_dst, PATH_MAX);
-
     process_directory(root);
     return 0;
 }
