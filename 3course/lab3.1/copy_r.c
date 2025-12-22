@@ -10,18 +10,21 @@
 #include <pthread.h>
 #include <limits.h>
 
-void* process_directory(void* arg);
+void *process_directory(void *arg);
 
-struct copy_task {
+struct copy_task
+{
     char sourcePath[PATH_MAX];
     char dstPath[PATH_MAX];
 };
 
-int safe_pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*start_routine)(void*), void* arg)
+int safe_pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
     int res = pthread_create(thread, attr, start_routine, arg);
-    while (res != 0) {
-        if (res == EAGAIN) {
+    while (res != 0)
+    {
+        if (res == EAGAIN)
+        {
             sleep(1);
             res = pthread_create(thread, attr, start_routine, arg);
             continue;
@@ -31,11 +34,13 @@ int safe_pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*s
     return 0;
 }
 
-int open_source_file(const char* path)
+int open_source_file(const char *path)
 {
     int fd = open(path, O_RDONLY);
-    while (fd == -1) {
-        if (errno == EMFILE) {
+    while (fd == -1)
+    {
+        if (errno == EMFILE)
+        {
             sleep(1);
             fd = open(path, O_RDONLY);
             continue;
@@ -46,22 +51,25 @@ int open_source_file(const char* path)
     return fd;
 }
 
-int open_dest_file(const char* path)
+int open_dest_file(const char *path)
 {
     int fd = -1;
     int res;
 
-    while (1) {
+    while (1)
+    {
         fd = open(path, O_WRONLY | O_CREAT, 0644);
         if (fd != -1)
             return fd;
 
-        if (errno == EMFILE) {
+        if (errno == EMFILE)
+        {
             sleep(1);
             continue;
         }
 
-        if (errno == EACCES) {
+        if (errno == EACCES)
+        {
             res = unlink(path);
             if (res == 0)
                 continue;
@@ -78,14 +86,17 @@ void copy_file_data(int src_fd, int dst_fd)
     ssize_t bytes_read = 0;
 
     bytes_read = read(src_fd, buffer, sizeof(buffer));
-    while (bytes_read > 0) {
+    while (bytes_read > 0)
+    {
         ssize_t total_written = 0;
 
-        while (total_written < bytes_read) {
+        while (total_written < bytes_read)
+        {
             ssize_t w = write(dst_fd,
-                buffer + total_written,
-                bytes_read - total_written);
-            if (w == -1) {
+                              buffer + total_written,
+                              bytes_read - total_written);
+            if (w == -1)
+            {
                 perror("write");
                 return;
             }
@@ -99,7 +110,7 @@ void copy_file_data(int src_fd, int dst_fd)
         perror("read");
 }
 
-void copy_file_permissions(const char* src_path, int dst_fd)
+void copy_file_permissions(const char *src_path, int dst_fd)
 {
     struct stat src_stat;
     int res = stat(src_path, &src_stat);
@@ -107,18 +118,20 @@ void copy_file_permissions(const char* src_path, int dst_fd)
         fchmod(dst_fd, src_stat.st_mode);
 }
 
-void* copy_file(void* arg)
+void *copy_file(void *arg)
 {
-    struct copy_task* task = arg;
+    struct copy_task *task = arg;
 
     int src_fd = open_source_file(task->sourcePath);
-    if (src_fd == -1) {
+    if (src_fd == -1)
+    {
         free(task);
         return NULL;
     }
 
     int dst_fd = open_dest_file(task->dstPath);
-    if (dst_fd == -1) {
+    if (dst_fd == -1)
+    {
         close(src_fd);
         free(task);
         return NULL;
@@ -133,38 +146,36 @@ void* copy_file(void* arg)
     return NULL;
 }
 
-void join_path(const char* dir, const char* file, char* out, size_t out_size)
+void join_path(const char *dir, const char *file, char *out, size_t out_size)
 {
     size_t len = snprintf(out, out_size, "%s/%s", dir, file);
     if (len >= out_size)
         fprintf(stderr, "path too long: %s/%s\n", dir, file);
 }
 
-int count_directory_entries(DIR* dir, struct dirent* buf)
+int count_directory_entries(DIR *dir)
 {
-    struct dirent* entry = NULL;
+    struct dirent *entry;
     int count = 0;
-    int res = 0;
 
     rewinddir(dir);
-    res = readdir_r(dir, buf, &entry);
-    while (res == 0 && entry != NULL) {
+    while ((entry = readdir(dir)) != NULL)
+    {
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
             count++;
-        res = readdir_r(dir, buf, &entry);
     }
 
     rewinddir(dir);
     return count;
 }
 
-void join_all_threads(pthread_t* threads, int count)
+void join_all_threads(pthread_t *threads, int count)
 {
     for (int i = 0; i < count; i++)
         pthread_join(threads[i], NULL);
 }
 
-void copy_directory_permissions(const char* src, const char* dst)
+void copy_directory_permissions(const char *src, const char *dst)
 {
     struct stat st;
     int res = stat(src, &st);
@@ -172,11 +183,13 @@ void copy_directory_permissions(const char* src, const char* dst)
         chmod(dst, st.st_mode);
 }
 
-int open_directory(const char* path, DIR** dir)
+int open_directory(const char *path, DIR **dir)
 {
     *dir = opendir(path);
-    while (*dir == NULL) {
-        if (errno == EMFILE) {
+    while (*dir == NULL)
+    {
+        if (errno == EMFILE)
+        {
             sleep(1);
             *dir = opendir(path);
             continue;
@@ -187,7 +200,7 @@ int open_directory(const char* path, DIR** dir)
     return 0;
 }
 
-int handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* threads, int* thread_count)
+int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threads, int *thread_count)
 {
     char src[PATH_MAX], dst[PATH_MAX];
     join_path(task->sourcePath, entry->d_name, src, PATH_MAX);
@@ -195,23 +208,25 @@ int handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* thread
 
     struct stat st;
     int st_res = lstat(src, &st);
-    if (st_res == -1) {
+    if (st_res == -1)
+    {
         perror("lstat");
         return 0;
     }
 
-    struct copy_task* new_task = malloc(sizeof(*new_task));
+    struct copy_task *new_task = malloc(sizeof(*new_task));
     strncpy(new_task->sourcePath, src, PATH_MAX);
     strncpy(new_task->dstPath, dst, PATH_MAX);
 
     int cr = -1;
     if (S_ISREG(st.st_mode))
         cr = safe_pthread_create(&threads[*thread_count], NULL,
-            copy_file, new_task);
+                                 copy_file, new_task);
     else if (S_ISDIR(st.st_mode))
         cr = safe_pthread_create(&threads[*thread_count], NULL,
-            process_directory, new_task);
-    else {
+                                 process_directory, new_task);
+    else
+    {
         free(new_task);
         return 0;
     }
@@ -223,92 +238,93 @@ int handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* thread
 
     return 0;
 }
-
-void* process_directory(void* arg)
+void *process_directory(void *arg)
 {
-    struct copy_task* task = arg;
+    struct copy_task *task = arg;
 
     int res = mkdir(task->dstPath, 0755);
-    if (res == -1 && errno != EEXIST) {
+    if (res == -1 && errno != EEXIST)
+    {
         perror("mkdir");
         free(task);
         return NULL;
     }
 
-    DIR* dir;
+    DIR *dir;
     res = open_directory(task->sourcePath, &dir);
-    if (res == -1) {
+    if (res == -1)
+    {
         free(task);
         return NULL;
     }
 
-    struct dirent* buf = malloc(sizeof(struct dirent) + 256);
-    int file_count = count_directory_entries(dir, buf);
+    int file_count = count_directory_entries(dir);
 
-    pthread_t* threads = malloc(sizeof(pthread_t) * file_count);
+    pthread_t *threads = malloc(sizeof(pthread_t) * file_count);
     int thread_count = 0;
 
-    struct dirent* entry = NULL;
-    res = readdir_r(dir, buf, &entry);
-    while (res == 0 && entry != NULL) {
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
             handle_entry(task, entry, threads, &thread_count);
-
-        res = readdir_r(dir, buf, &entry);
     }
 
     join_all_threads(threads, thread_count);
     copy_directory_permissions(task->sourcePath, task->dstPath);
 
     free(threads);
-    free(buf);
     closedir(dir);
     free(task);
     return NULL;
 }
-
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    if (argc != 3) {
+    if (argc != 3)
+    {
         fprintf(stderr, "%s source_dir dest_dir\n", argv[0]);
         return 1;
     }
 
     char real_src[PATH_MAX], real_dst[PATH_MAX];
-    char* rp_res = realpath(argv[1], real_src);
-    if (rp_res == NULL) {
+    char *rp_res = realpath(argv[1], real_src);
+    if (rp_res == NULL)
+    {
         perror("realpath source");
         return 1;
     }
 
     struct stat st;
     int st_res = stat(real_src, &st);
-    if (st_res == -1 || !S_ISDIR(st.st_mode)) {
+    if (st_res == -1 || !S_ISDIR(st.st_mode))
+    {
         fprintf(stderr, "Source is not a directory\n");
         return 1;
     }
 
     int res = mkdir(argv[2], 0755);
-    if (res == -1 && errno != EEXIST) {
+    if (res == -1 && errno != EEXIST)
+    {
         perror("mkdir dest");
         return 1;
     }
 
     rp_res = realpath(argv[2], real_dst);
-    if (rp_res == NULL) {
+    if (rp_res == NULL)
+    {
         perror("realpath dest");
         return 1;
     }
 
     if (!strncmp(real_src, real_dst, strlen(real_src)) &&
         (real_dst[strlen(real_src)] == '/' ||
-            real_dst[strlen(real_src)] == '\0')) {
+         real_dst[strlen(real_src)] == '\0'))
+    {
         fprintf(stderr, "Dest is inside source\n");
         return 1;
     }
 
-    struct copy_task* root = malloc(sizeof(*root));
+    struct copy_task *root = malloc(sizeof(*root));
     strncpy(root->sourcePath, real_src, PATH_MAX);
     strncpy(root->dstPath, real_dst, PATH_MAX);
 
