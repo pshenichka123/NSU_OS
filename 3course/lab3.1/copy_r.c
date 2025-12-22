@@ -68,13 +68,6 @@ int open_dest_file(const char *path)
             continue;
         }
 
-        if (errno == EACCES)
-        {
-            res = unlink(path);
-            if (res == 0)
-                continue;
-        }
-
         perror("open destination file");
         return -1;
     }
