@@ -45,7 +45,8 @@ int open_source_file(const char *path)
             fd = open(path, O_RDONLY);
             continue;
         }
-        perror("open source file");
+        printf("%s\n", path);
+        perror("open source file:\n");
         return -1;
     }
     return fd;
@@ -54,7 +55,6 @@ int open_source_file(const char *path)
 int open_dest_file(const char *path)
 {
     int fd = -1;
-    int res;
 
     while (1)
     {
@@ -218,7 +218,7 @@ int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *thread
     int cr = -1;
     if (S_ISREG(st.st_mode))
         cr = safe_pthread_create(&threads[*thread_count], NULL, copy_file, new_task);
-    if (S_ISDIR(st.st_mode))
+    else if (S_ISDIR(st.st_mode))
         cr = safe_pthread_create(&threads[*thread_count], NULL, process_directory, new_task);
     else
     {
