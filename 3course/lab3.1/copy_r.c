@@ -176,7 +176,7 @@ void join_all_threads(pthread_t *threads, int count)
         int ret = pthread_join(threads[i], NULL);
         if (ret != 0)
             perror("pthread_join failed");
-        }
+    }
 }
 
 void copy_directory_permissions(const char *src, const char *dst)
