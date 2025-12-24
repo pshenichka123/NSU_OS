@@ -194,7 +194,7 @@ int open_directory(const char *path, DIR **dir)
     return 0;
 }
 
-int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threads, int *thread_count)
+void handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threads, int *thread_count)
 {
     char src[PATH_MAX], dst[PATH_MAX];
     join_path(task->sourcePath, entry->d_name, src, PATH_MAX);
@@ -205,7 +205,7 @@ int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *thread
     if (st_res == -1)
     {
         perror("lstat");
-        return 0;
+        return;
     }
 
     struct copy_task *new_task = malloc(sizeof(*new_task));
@@ -220,7 +220,7 @@ int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *thread
     else
     {
         free(new_task);
-        return 0;
+        return;
     }
 
     if (cr == 0)
@@ -228,7 +228,7 @@ int handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *thread
     else
         free(new_task);
 
-    return 0;
+    return;
 }
 void *process_directory(void *arg)
 {
