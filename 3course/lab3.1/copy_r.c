@@ -311,7 +311,7 @@ void* process_directory(void* arg)
 
 
 static int validate_and_prepare_inputs(int argc, char* argv[], char* source_dir, char* dest_dir) {
-    if (argc != 3) {
+    if (argc != ARG_COUNT) {
         fprintf(stderr, "Usage: %s source_dir dest_dir\n", argv[0]);
         return ERROR;
     }
@@ -381,5 +381,5 @@ int main(int argc, char* argv[]) {
 
 
     process_directory(root);
-    return 0;
+    return SUCCESS;
 }
