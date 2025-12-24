@@ -54,23 +54,20 @@ int open_source_file(const char *path)
 
 int open_dest_file(const char *path)
 {
-    int fd = -1;
-
-    while (1)
+    int fd = open(path, O_WRONLY | O_CREAT, 0644);
+    while (fd == -1)
     {
-        fd = open(path, O_WRONLY | O_CREAT, 0644);
-        if (fd != -1)
-            return fd;
-
         if (errno == EMFILE)
         {
             sleep(1);
+            fd = open(path, O_WRONLY | O_CREAT, 0644);
             continue;
         }
-
+        printf("%s\n", path);
         perror("open destination file");
         return -1;
     }
+    return fd;
 }
 
 void copy_file_data(int src_fd, int dst_fd)
