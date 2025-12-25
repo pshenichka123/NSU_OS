@@ -232,16 +232,12 @@ void handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threa
 
     status = join_path(task->sourcePath, entry->d_name, src, PATH_MAX);
     if (status == ERROR)
-    {
-        free(task);
         return;
-    }
+
     status = join_path(task->dstPath, entry->d_name, dst, PATH_MAX);
     if (status == ERROR)
-    {
-        free(task);
         return;
-    }
+
     struct stat st;
     int st_res = lstat(src, &st);
     if (st_res == ERROR)
@@ -251,6 +247,11 @@ void handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threa
     }
 
     struct copy_task *new_task = malloc(sizeof(*new_task));
+    if (new_task == NULL)
+    {
+        perror("malloc");
+        return;
+    }
     strncpy(new_task->sourcePath, src, PATH_MAX);
     strncpy(new_task->dstPath, dst, PATH_MAX);
 
@@ -359,8 +360,8 @@ int validate_and_prepare_inputs(int argc, char *argv[], char *source_dir, char *
         perror("realpath dest");
         return ERROR;
     }
-
-    if (!strncmp(real_src, real_dst, strlen(real_src)) && (real_dst[strlen(real_src)] == '/' || real_dst[strlen(real_src)] == '\0'))
+    int is_destination_is_inside_source = !strncmp(real_src, real_dst, strlen(real_src)) && (real_dst[strlen(real_src)] == '/' || real_dst[strlen(real_src)] == '\0');
+    if (is_destination_is_inside_source)
     {
         fprintf(stderr, "Dest is inside source\n");
         return ERROR;
