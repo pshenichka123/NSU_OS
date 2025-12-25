@@ -1,1 +1,0 @@
-This is file 4 in directory ./test_dir/dir2/subdir5/nest2

@@ -17,7 +17,7 @@
 #define ARG_COUNT 3
 #define MAX_TRY_COUNT 120
 #define PERMISSIONS (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
-void* process_directory(void* arg);
+void *process_directory(void *arg);
 
 struct copy_task
 {
@@ -25,7 +25,7 @@ struct copy_task
     char dstPath[PATH_MAX];
 };
 
-int safe_pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*start_routine)(void*), void* arg)
+int safe_pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
     int try_count = 0;
     int status = pthread_create(thread, attr, start_routine, arg);
@@ -47,7 +47,7 @@ int safe_pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*s
     return SUCCESS;
 }
 
-int open_source_file(const char* path)
+int open_source_file(const char *path)
 {
     int try_count = 0;
     int fd = open(path, O_RDONLY);
@@ -71,7 +71,7 @@ int open_source_file(const char* path)
     return fd;
 }
 
-int open_dest_file(const char* path)
+int open_dest_file(const char *path)
 {
     int try_count = 0;
     int fd = open(path, O_WRONLY | O_CREAT, PERMISSIONS);
@@ -108,8 +108,8 @@ void copy_file_data(int src_fd, int dst_fd)
         while (total_written < bytes_read)
         {
             ssize_t written = write(dst_fd,
-                buffer + total_written,
-                bytes_read - total_written);
+                                    buffer + total_written,
+                                    bytes_read - total_written);
             if (written == ERROR)
             {
                 perror("write");
@@ -125,7 +125,7 @@ void copy_file_data(int src_fd, int dst_fd)
         perror("read");
 }
 
-void copy_file_permissions(const char* src_path, int dst_fd)
+void copy_file_permissions(const char *src_path, int dst_fd)
 {
     struct stat src_stat;
     int res = stat(src_path, &src_stat);
@@ -134,9 +134,9 @@ void copy_file_permissions(const char* src_path, int dst_fd)
     fchmod(dst_fd, src_stat.st_mode);
 }
 
-void* copy_file(void* arg)
+void *copy_file(void *arg)
 {
-    struct copy_task* task = arg;
+    struct copy_task *task = arg;
 
     int src_fd = open_source_file(task->sourcePath);
     if (src_fd == ERROR)
@@ -162,22 +162,26 @@ void* copy_file(void* arg)
     return NULL;
 }
 
-void join_path(const char* dir, const char* file, char* out, size_t out_size)
+int join_path(const char *dir, const char *file, char *out, size_t out_size)
 {
     size_t len = snprintf(out, out_size, "%s/%s", dir, file);
     if (len >= out_size)
+    {
         fprintf(stderr, "path too long: %s/%s\n", dir, file);
+        return ERROR;
+    }
+    return SUCCESS;
 }
 
-int count_directory_entries(DIR* dir)
+int count_directory_entries(DIR *dir)
 {
-    struct dirent* entry;
+    struct dirent *entry;
     int count = 0;
-
     rewinddir(dir);
     while ((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name, CURENT_DIRECTORY_RELATIVE_PATH) && strcmp(entry->d_name, PARENT_DIRECTORY_RELATIVE_PATH))
+        int not_current_or_parent_derectory = strcmp(entry->d_name, CURENT_DIRECTORY_RELATIVE_PATH) && strcmp(entry->d_name, PARENT_DIRECTORY_RELATIVE_PATH);
+        if (not_current_or_parent_derectory)
             count++;
     }
 
@@ -185,7 +189,7 @@ int count_directory_entries(DIR* dir)
     return count;
 }
 
-void join_all_threads(pthread_t* threads, int thread_count)
+void join_all_threads(pthread_t *threads, int thread_count)
 {
     for (int thread_index = 0; thread_index < thread_count; thread_index++)
     {
@@ -195,15 +199,15 @@ void join_all_threads(pthread_t* threads, int thread_count)
     }
 }
 
-void copy_directory_permissions(const char* src, const char* dst)
+void copy_directory_permissions(const char *src, const char *dst)
 {
     struct stat st;
-    int res = stat(src, &st);
-    if (res == SUCCESS)
+    int status = stat(src, &st);
+    if (status == SUCCESS)
         chmod(dst, st.st_mode);
 }
 
-int open_directory(const char* path, DIR** dir)
+int open_directory(const char *path, DIR **dir)
 {
     *dir = opendir(path);
     while (*dir == NULL)
@@ -220,12 +224,24 @@ int open_directory(const char* path, DIR** dir)
     return SUCCESS;
 }
 
-void handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* threads, int* thread_count)
+void handle_entry(struct copy_task *task, struct dirent *entry, pthread_t *threads, int *thread_count)
 {
-    char src[PATH_MAX], dst[PATH_MAX];
-    join_path(task->sourcePath, entry->d_name, src, PATH_MAX);
-    join_path(task->dstPath, entry->d_name, dst, PATH_MAX);
+    char src[PATH_MAX];
+    char dst[PATH_MAX];
+    int status;
 
+    status = join_path(task->sourcePath, entry->d_name, src, PATH_MAX);
+    if (status == ERROR)
+    {
+        free(task);
+        return;
+    }
+    status = join_path(task->dstPath, entry->d_name, dst, PATH_MAX);
+    if (status == ERROR)
+    {
+        free(task);
+        return;
+    }
     struct stat st;
     int st_res = lstat(src, &st);
     if (st_res == ERROR)
@@ -234,20 +250,19 @@ void handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* threa
         return;
     }
 
-    struct copy_task* new_task = malloc(sizeof(*new_task));
+    struct copy_task *new_task = malloc(sizeof(*new_task));
     strncpy(new_task->sourcePath, src, PATH_MAX);
     strncpy(new_task->dstPath, dst, PATH_MAX);
 
-    int status;
-    if (S_ISREG(st.st_mode))
-        status = safe_pthread_create(&threads[*thread_count], NULL, copy_file, new_task);
-    else if (S_ISDIR(st.st_mode))
-        status = safe_pthread_create(&threads[*thread_count], NULL, process_directory, new_task);
-    else
+    if (!S_ISREG(st.st_mode) && !S_ISDIR(st.st_mode))
     {
         free(new_task);
         return;
     }
+    if (S_ISREG(st.st_mode))
+        status = safe_pthread_create(&threads[*thread_count], NULL, copy_file, new_task);
+    if (S_ISDIR(st.st_mode))
+        status = safe_pthread_create(&threads[*thread_count], NULL, process_directory, new_task);
 
     if (status != SUCCESS)
     {
@@ -258,9 +273,9 @@ void handle_entry(struct copy_task* task, struct dirent* entry, pthread_t* threa
 
     return;
 }
-void* process_directory(void* arg)
+void *process_directory(void *arg)
 {
-    struct copy_task* task = arg;
+    struct copy_task *task = arg;
 
     int status = mkdir(task->dstPath, PERMISSIONS);
     if (status == ERROR && errno != EEXIST)
@@ -272,7 +287,7 @@ void* process_directory(void* arg)
         return NULL;
     }
 
-    DIR* dir;
+    DIR *dir;
     status = open_directory(task->sourcePath, &dir);
     if (status == ERROR)
     {
@@ -282,18 +297,19 @@ void* process_directory(void* arg)
 
     int file_count = count_directory_entries(dir);
 
-    pthread_t* threads = malloc(sizeof(pthread_t) * file_count);
+    pthread_t *threads = malloc(sizeof(pthread_t) * file_count);
     if (threads == NULL)
     {
         perror("malloc:");
         return NULL;
     }
     int thread_count = 0;
+    struct dirent *entry;
 
-    struct dirent* entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name, CURENT_DIRECTORY_RELATIVE_PATH) && strcmp(entry->d_name, PARENT_DIRECTORY_RELATIVE_PATH))
+        int not_current_or_parent_derectory = strcmp(entry->d_name, CURENT_DIRECTORY_RELATIVE_PATH) && strcmp(entry->d_name, PARENT_DIRECTORY_RELATIVE_PATH);
+        if (not_current_or_parent_derectory)
             handle_entry(task, entry, threads, &thread_count);
     }
 
@@ -306,19 +322,17 @@ void* process_directory(void* arg)
     return NULL;
 }
 
-
-
-
-
-static int validate_and_prepare_inputs(int argc, char* argv[], char* source_dir, char* dest_dir) {
-    if (argc != ARG_COUNT) {
+int validate_and_prepare_inputs(int argc, char *argv[], char *source_dir, char *dest_dir)
+{
+    if (argc != ARG_COUNT)
+    {
         fprintf(stderr, "Usage: %s source_dir dest_dir\n", argv[0]);
         return ERROR;
     }
 
     char real_src[PATH_MAX], real_dst[PATH_MAX];
-    char* src_arg = argv[1];
-    char* dst_arg = argv[2];
+    char *src_arg = argv[1];
+    char *dst_arg = argv[2];
     int status;
     if (realpath(src_arg, real_src) == NULL)
     {
@@ -356,29 +370,28 @@ static int validate_and_prepare_inputs(int argc, char* argv[], char* source_dir,
     {
         fprintf(stderr, "Source and dest are same\n");
         return ERROR;
-
     }
     strncpy(source_dir, real_src, PATH_MAX);
     strncpy(dest_dir, real_dst, PATH_MAX);
     return SUCCESS;
 }
 
-
-int main(int argc, char* argv[]) {
-    char source_dir[PATH_MAX], dest_dir[PATH_MAX];
-
-    if (validate_and_prepare_inputs(argc, argv, source_dir, dest_dir) != SUCCESS)
+int main(int argc, char *argv[])
+{
+    char source_dir[PATH_MAX];
+    char dest_dir[PATH_MAX];
+    int status = validate_and_prepare_inputs(argc, argv, source_dir, dest_dir);
+    if (status != SUCCESS)
         return ERROR;
 
-
-    struct copy_task* root = malloc(sizeof(*root));
-    if (root == NULL) {
+    struct copy_task *root = malloc(sizeof(*root));
+    if (root == NULL)
+    {
         perror("malloc");
         return ERROR;
     }
     strncpy(root->sourcePath, source_dir, PATH_MAX);
     strncpy(root->dstPath, dest_dir, PATH_MAX);
-
 
     process_directory(root);
     return SUCCESS;
